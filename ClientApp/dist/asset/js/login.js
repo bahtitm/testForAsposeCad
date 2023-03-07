@@ -35,7 +35,7 @@ function login(username, password) {
 
   http.onreadystatechange = function () {
     if (http.readyState == 4 && http.status == 200) {      
-      localStorage.setItem("token", http.responseText);
+      localStorage.setItem("token", http.responseText);      
       window.location.assign("/index.html");     
     }
   };

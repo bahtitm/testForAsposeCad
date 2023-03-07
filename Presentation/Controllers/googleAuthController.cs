@@ -1,5 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -22,10 +23,12 @@ namespace ForAspose.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> ExternalLoginCallback()
+        public async void ExternalLoginCallback()
         {
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null) return;
+            
 
 
             var claims = new List<Claim>();
@@ -45,16 +48,11 @@ namespace ForAspose.Controllers
             {
                 access_token = encodedJwt,
                 username = "Aliya"
-            };
+            };            
+           
+            Response.Cookies.Append("token", JsonSerializer.Serialize(response));
 
-            return Ok(response);
-            //return Redirect("https://localhost:7107/api/Authentication"); 
-
-
-
-
-
-
+            Response.Redirect("google.html");
         }
     }
 }
