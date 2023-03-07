@@ -1,9 +1,12 @@
 using System.Text;
 using Application;
+using Domain;
+using ForAspose;
 using ForAspose.Data;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -19,7 +22,6 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services.AddSession();
-builder.Services.AddAuthorization();
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
     builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
@@ -59,7 +61,7 @@ builder.Services.AddSpaStaticFiles(configuration =>
     configuration.RootPath = "../ClientApp/dist";
 });
 builder.Services.AddAuthorization();
-object p = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -72,8 +74,15 @@ object p = builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationSc
             IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
             ValidateIssuerSigningKey = true,
         };
-    });
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = config["Authentication:Google:ClientId"];
+        googleOptions.ClientSecret = config["Authentication:Google:ClientSecret"];
+    }) ;
 
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+                .AddEntityFrameworkStores<AppDbContext>();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

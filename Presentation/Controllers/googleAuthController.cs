@@ -1,7 +1,6 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Application.Users.Queries.GetAllUserPermission;
-using MediatR;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -10,27 +9,28 @@ namespace ForAspose.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthenticationController : ControllerBase
+    public class googleAuthController : ControllerBase
     {
-        private readonly IMediator mediator;
-        public AuthenticationController(IMediator mediator)
+
+        private readonly SignInManager<AppUser> _signInManager;
+        public googleAuthController(SignInManager<AppUser> signInManager)
         {
-            this.mediator = mediator;
+
+            _signInManager = signInManager;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Login([FromBody] GetAllUserPermissionQuery command)
-        {
-            var permissions = await mediator.Send(command);
-            if (permissions == null) return BadRequest();
-            var claims = new List<Claim>();
-            foreach (var item in permissions)
-            {
-                var claim = new Claim(item.ClaimType.ToString(), item.ClaimValue.ToString());
-                claims.Add(claim);
 
-            }
-            var userName = new Claim("UserName", command.Name);
+
+        [HttpGet]
+        public async Task<IActionResult> ExternalLoginCallback()
+        {
+
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+
+
+            var claims = new List<Claim>();
+
+            var userName = new Claim("UserName", "Aliya");
             claims.Add(userName);
             var jwt = new JwtSecurityToken(
                     issuer: AuthOptions.ISSUER,
@@ -44,10 +44,17 @@ namespace ForAspose.Controllers
             var response = new
             {
                 access_token = encodedJwt,
-                username = command.Name
+                username = "Aliya"
             };
 
             return Ok(response);
+            //return Redirect("https://localhost:7107/api/Authentication"); 
+
+
+
+
+
+
         }
     }
 }
