@@ -28,12 +28,13 @@ namespace ForAspose.Controllers
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
             if (info == null) return;
-            
+           
+           
 
 
             var claims = new List<Claim>();
 
-            var userName = new Claim("UserName", "Aliya");
+            var userName = new Claim("UserName", info.Principal.Identity.Name);
             claims.Add(userName);
             var jwt = new JwtSecurityToken(
                     issuer: AuthOptions.ISSUER,
@@ -47,7 +48,7 @@ namespace ForAspose.Controllers
             var response = new
             {
                 access_token = encodedJwt,
-                username = "Aliya"
+                username = info.Principal.Identity.Name
             };            
            
             Response.Cookies.Append("token", JsonSerializer.Serialize(response));
